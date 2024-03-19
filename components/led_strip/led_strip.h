@@ -32,20 +32,37 @@
  *
  * MIT Licensed as described in the file LICENSE
  */
+
 #ifndef __LED_STRIP_H__
 #define __LED_STRIP_H__
 
+#include <esp_idf_lib_helpers.h>
+#include <esp_idf_version.h>
+
+#if HELPER_TARGET_IS_ESP8266
+#error led_strip is not supported on ESP8266
+#endif
+
+#include <color.h>
 #include <driver/gpio.h>
 #include <esp_err.h>
-#include <driver/rmt.h>
-#include <color.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
 #define LED_STRIP_BRIGHTNESS 1
+#endif
+
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+#define NEW_RMT_DRIVER 1
+#endif
+
+#ifdef NEW_RMT_DRIVER
+#include <driver/rmt_tx.h>
+#else
+#include <driver/rmt.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /**
@@ -57,6 +74,7 @@ typedef enum
     LED_STRIP_SK6812,
     LED_STRIP_APA106,
     LED_STRIP_SM16703,
+    LED_STRIP_PI33TB,
 
     LED_STRIP_TYPE_MAX
 } led_strip_type_t;
@@ -66,15 +84,20 @@ typedef enum
  */
 typedef struct
 {
-    led_strip_type_t type; ///< LED type
-    bool is_rgbw;          ///< true for RGBW strips
+    led_strip_type_t type;          ///< LED type
+    bool is_rgbw;                   ///< true for RGBW strips
 #ifdef LED_STRIP_BRIGHTNESS
-    uint8_t brightness;    ///< Brightness 0..255, call ::led_strip_flush() after change.
-                           ///< Supported only for ESP-IDF version >= 4.3
+    uint8_t brightness;             ///< Brightness 0..255, call ::led_strip_flush() after change.
+                                    ///< Supported only for ESP-IDF version >= 4.3
 #endif
-    size_t length;         ///< Number of LEDs in strip
-    gpio_num_t gpio;       ///< Data GPIO pin
-    rmt_channel_t channel; ///< RMT channel
+    size_t length;                  ///< Number of LEDs in strip
+    gpio_num_t gpio;                ///< Data GPIO pin
+#ifdef NEW_RMT_DRIVER
+    rmt_channel_handle_t channel;   ///< RMT channel
+    rmt_encoder_handle_t encoder;   ///< RMT encoder
+#else
+    rmt_channel_t channel;          ///< RMT channel
+#endif
     uint8_t *buf;
 } led_strip_t;
 
