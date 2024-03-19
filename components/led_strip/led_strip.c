@@ -24,22 +24,19 @@
 /**
  * @file led_strip.c
  *
- * RMT-based ESP-IDF driver for WS2812B/SK6812/APA106/SM16703 LED strips
+ * RMT-based ESP-IDF driver for WS2812B/SK6812/APA106/SM16703/PI33TB LED strips
  *
  * Copyright (c) 2020 Ruslan V. Uss <unclerus@gmail.com>
  *
  * MIT Licensed as described in the file LICENSE
  */
-#include "led_strip.h"
-#include <esp_log.h>
-#include <esp_attr.h>
-#include <stdlib.h>
-#include <ets_sys.h>
-#include <esp_idf_lib_helpers.h>
 
-#if HELPER_TARGET_IS_ESP8266
-#error led_strip is not supported on ESP8266
-#endif
+#include <esp_attr.h>
+#include <esp_log.h>
+#include <ets_sys.h>
+#include <stdlib.h>
+
+#include "led_strip.h"
 
 #ifndef RMT_DEFAULT_CONFIG_TX
 #define RMT_DEFAULT_CONFIG_TX(gpio, channel_id)      \
@@ -140,6 +137,12 @@ static void IRAM_ATTR sm16703_rmt_adapter(const void *src, rmt_item32_t *dest, s
     _rmt_adapter(src, dest, src_size, wanted_num, translated_size, item_num, &rmt_items[LED_STRIP_SM16703].bit0, &rmt_items[LED_STRIP_SM16703].bit1);
 }
 
+static void IRAM_ATTR pi33tb_rmt_adapter(const void *src, rmt_item32_t *dest, size_t src_size,
+                                         size_t wanted_num, size_t *translated_size, size_t *item_num)
+{
+    _rmt_adapter(src, dest, src_size, wanted_num, translated_size, item_num, &rmt_items[LED_STRIP_PI33TB].bit0, &rmt_items[LED_STRIP_PI33TB].bit1);
+}
+
 typedef enum {
     ORDER_GRB,
     ORDER_RGB,
@@ -156,6 +159,7 @@ static const led_params_t led_params[] = {
     [LED_STRIP_SK6812]  = { .t0h = 300, .t0l = 900,  .t1h = 600,  .t1l = 600, .order = ORDER_GRB, .adapter = sk6812_rmt_adapter },
     [LED_STRIP_APA106]  = { .t0h = 350, .t0l = 1360, .t1h = 1360, .t1l = 350, .order = ORDER_RGB, .adapter = apa106_rmt_adapter },
     [LED_STRIP_SM16703] = { .t0h = 300, .t0l = 900,  .t1h = 1360, .t1l = 350, .order = ORDER_RGB, .adapter = sm16703_rmt_adapter },
+    [LED_STRIP_PI33TB]  = { .t0h = 300, .t0l = 900,  .t1h = 900,  .t1l = 300, .order = ORDER_GRB, .adapter = pi33tb_rmt_adapter },
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-# RMT-based ESP-IDF driver for WS2812B/SK6812/APA106 LED strips
+# RMT-based ESP-IDF driver for WS2812B/SK6812/APA106/SM16703/PI33TB LED strips
 
 **WARNING!** If you try to use this driver simultaneously with Wi-Fi, you may
 encounter RMT transmission bugs. To avoid them, simply initialize device

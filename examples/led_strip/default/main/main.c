@@ -5,6 +5,7 @@
 
 #define LED_TYPE LED_STRIP_WS2812
 #define LED_GPIO CONFIG_LED_STRIP_GPIO
+#define LED_LEN CONFIG_LED_STRIP_LEN
 
 static const rgb_t colors[] = {
     { .r = 0x0f, .g = 0x0f, .b = 0x0f },
@@ -20,7 +21,7 @@ void test(void *pvParameters)
 {
     led_strip_t strip = {
         .type = LED_TYPE,
-        .length = CONFIG_LED_STRIP_LEN,
+        .length = LED_LEN,
         .gpio = LED_GPIO,
         .buf = NULL,
 #ifdef LED_STRIP_BRIGHTNESS
